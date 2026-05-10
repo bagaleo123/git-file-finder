@@ -9,8 +9,50 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OtTaxRouteImport } from './routes/ot-tax'
+import { Route as JusticeMapRouteImport } from './routes/justice-map'
+import { Route as FightBackRouteImport } from './routes/fight-back'
+import { Route as DocumentsRouteImport } from './routes/documents'
+import { Route as ContractScanRouteImport } from './routes/contract-scan'
+import { Route as ChatRouteImport } from './routes/chat'
+import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as IndexRouteImport } from './routes/index'
 
+const OtTaxRoute = OtTaxRouteImport.update({
+  id: '/ot-tax',
+  path: '/ot-tax',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JusticeMapRoute = JusticeMapRouteImport.update({
+  id: '/justice-map',
+  path: '/justice-map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FightBackRoute = FightBackRouteImport.update({
+  id: '/fight-back',
+  path: '/fight-back',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContractScanRoute = ContractScanRouteImport.update({
+  id: '/contract-scan',
+  path: '/contract-scan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalculatorRoute = CalculatorRouteImport.update({
+  id: '/calculator',
+  path: '/calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +61,130 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/calculator': typeof CalculatorRoute
+  '/chat': typeof ChatRoute
+  '/contract-scan': typeof ContractScanRoute
+  '/documents': typeof DocumentsRoute
+  '/fight-back': typeof FightBackRoute
+  '/justice-map': typeof JusticeMapRoute
+  '/ot-tax': typeof OtTaxRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/calculator': typeof CalculatorRoute
+  '/chat': typeof ChatRoute
+  '/contract-scan': typeof ContractScanRoute
+  '/documents': typeof DocumentsRoute
+  '/fight-back': typeof FightBackRoute
+  '/justice-map': typeof JusticeMapRoute
+  '/ot-tax': typeof OtTaxRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/calculator': typeof CalculatorRoute
+  '/chat': typeof ChatRoute
+  '/contract-scan': typeof ContractScanRoute
+  '/documents': typeof DocumentsRoute
+  '/fight-back': typeof FightBackRoute
+  '/justice-map': typeof JusticeMapRoute
+  '/ot-tax': typeof OtTaxRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/calculator'
+    | '/chat'
+    | '/contract-scan'
+    | '/documents'
+    | '/fight-back'
+    | '/justice-map'
+    | '/ot-tax'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/calculator'
+    | '/chat'
+    | '/contract-scan'
+    | '/documents'
+    | '/fight-back'
+    | '/justice-map'
+    | '/ot-tax'
+  id:
+    | '__root__'
+    | '/'
+    | '/calculator'
+    | '/chat'
+    | '/contract-scan'
+    | '/documents'
+    | '/fight-back'
+    | '/justice-map'
+    | '/ot-tax'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CalculatorRoute: typeof CalculatorRoute
+  ChatRoute: typeof ChatRoute
+  ContractScanRoute: typeof ContractScanRoute
+  DocumentsRoute: typeof DocumentsRoute
+  FightBackRoute: typeof FightBackRoute
+  JusticeMapRoute: typeof JusticeMapRoute
+  OtTaxRoute: typeof OtTaxRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/ot-tax': {
+      id: '/ot-tax'
+      path: '/ot-tax'
+      fullPath: '/ot-tax'
+      preLoaderRoute: typeof OtTaxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/justice-map': {
+      id: '/justice-map'
+      path: '/justice-map'
+      fullPath: '/justice-map'
+      preLoaderRoute: typeof JusticeMapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fight-back': {
+      id: '/fight-back'
+      path: '/fight-back'
+      fullPath: '/fight-back'
+      preLoaderRoute: typeof FightBackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contract-scan': {
+      id: '/contract-scan'
+      path: '/contract-scan'
+      fullPath: '/contract-scan'
+      preLoaderRoute: typeof ContractScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calculator': {
+      id: '/calculator'
+      path: '/calculator'
+      fullPath: '/calculator'
+      preLoaderRoute: typeof CalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +197,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CalculatorRoute: CalculatorRoute,
+  ChatRoute: ChatRoute,
+  ContractScanRoute: ContractScanRoute,
+  DocumentsRoute: DocumentsRoute,
+  FightBackRoute: FightBackRoute,
+  JusticeMapRoute: JusticeMapRoute,
+  OtTaxRoute: OtTaxRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
