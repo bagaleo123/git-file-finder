@@ -1,1 +1,7 @@
 project_id = "odooaixhuzkzzhbxxsbq"
+
+[functions.ai-legal-chat]
+verify_jwt = false
+
+[functions.scan-contract]
+verify_jwt = false
