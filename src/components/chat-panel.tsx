@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Send, Sparkles, Loader2 } from "lucide-react";
+import { AIDisclaimer } from "./ai-disclaimer";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-legal-chat`;
 
@@ -161,6 +162,7 @@ export function ChatPanel({ initialMessages = [] as Msg[] }) {
           <Send className="h-4 w-4" />
         </button>
       </form>
+      <AIDisclaimer compact />
     </div>
   );
 }
