@@ -9,18 +9,33 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as OtTaxRouteImport } from './routes/ot-tax'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as JusticeMapRouteImport } from './routes/justice-map'
 import { Route as FightBackRouteImport } from './routes/fight-back'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as ContractScanRouteImport } from './routes/contract-scan'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CalculatorRouteImport } from './routes/calculator'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedCasesRouteImport } from './routes/_authenticated/cases'
+import { Route as AuthenticatedCasesCaseIdRouteImport } from './routes/_authenticated/cases.$caseId'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OtTaxRoute = OtTaxRouteImport.update({
   id: '/ot-tax',
   path: '/ot-tax',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JusticeMapRoute = JusticeMapRouteImport.update({
@@ -53,11 +68,26 @@ const CalculatorRoute = CalculatorRouteImport.update({
   path: '/calculator',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCasesRoute = AuthenticatedCasesRouteImport.update({
+  id: '/cases',
+  path: '/cases',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedCasesCaseIdRoute =
+  AuthenticatedCasesCaseIdRouteImport.update({
+    id: '/$caseId',
+    path: '/$caseId',
+    getParentRoute: () => AuthenticatedCasesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -67,7 +97,11 @@ export interface FileRoutesByFullPath {
   '/documents': typeof DocumentsRoute
   '/fight-back': typeof FightBackRoute
   '/justice-map': typeof JusticeMapRoute
+  '/login': typeof LoginRoute
   '/ot-tax': typeof OtTaxRoute
+  '/signup': typeof SignupRoute
+  '/cases': typeof AuthenticatedCasesRouteWithChildren
+  '/cases/$caseId': typeof AuthenticatedCasesCaseIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,18 +111,27 @@ export interface FileRoutesByTo {
   '/documents': typeof DocumentsRoute
   '/fight-back': typeof FightBackRoute
   '/justice-map': typeof JusticeMapRoute
+  '/login': typeof LoginRoute
   '/ot-tax': typeof OtTaxRoute
+  '/signup': typeof SignupRoute
+  '/cases': typeof AuthenticatedCasesRouteWithChildren
+  '/cases/$caseId': typeof AuthenticatedCasesCaseIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/calculator': typeof CalculatorRoute
   '/chat': typeof ChatRoute
   '/contract-scan': typeof ContractScanRoute
   '/documents': typeof DocumentsRoute
   '/fight-back': typeof FightBackRoute
   '/justice-map': typeof JusticeMapRoute
+  '/login': typeof LoginRoute
   '/ot-tax': typeof OtTaxRoute
+  '/signup': typeof SignupRoute
+  '/_authenticated/cases': typeof AuthenticatedCasesRouteWithChildren
+  '/_authenticated/cases/$caseId': typeof AuthenticatedCasesCaseIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,7 +143,11 @@ export interface FileRouteTypes {
     | '/documents'
     | '/fight-back'
     | '/justice-map'
+    | '/login'
     | '/ot-tax'
+    | '/signup'
+    | '/cases'
+    | '/cases/$caseId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -110,37 +157,63 @@ export interface FileRouteTypes {
     | '/documents'
     | '/fight-back'
     | '/justice-map'
+    | '/login'
     | '/ot-tax'
+    | '/signup'
+    | '/cases'
+    | '/cases/$caseId'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/calculator'
     | '/chat'
     | '/contract-scan'
     | '/documents'
     | '/fight-back'
     | '/justice-map'
+    | '/login'
     | '/ot-tax'
+    | '/signup'
+    | '/_authenticated/cases'
+    | '/_authenticated/cases/$caseId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   CalculatorRoute: typeof CalculatorRoute
   ChatRoute: typeof ChatRoute
   ContractScanRoute: typeof ContractScanRoute
   DocumentsRoute: typeof DocumentsRoute
   FightBackRoute: typeof FightBackRoute
   JusticeMapRoute: typeof JusticeMapRoute
+  LoginRoute: typeof LoginRoute
   OtTaxRoute: typeof OtTaxRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ot-tax': {
       id: '/ot-tax'
       path: '/ot-tax'
       fullPath: '/ot-tax'
       preLoaderRoute: typeof OtTaxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/justice-map': {
@@ -185,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -192,29 +272,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/cases': {
+      id: '/_authenticated/cases'
+      path: '/cases'
+      fullPath: '/cases'
+      preLoaderRoute: typeof AuthenticatedCasesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/cases/$caseId': {
+      id: '/_authenticated/cases/$caseId'
+      path: '/$caseId'
+      fullPath: '/cases/$caseId'
+      preLoaderRoute: typeof AuthenticatedCasesCaseIdRouteImport
+      parentRoute: typeof AuthenticatedCasesRoute
+    }
   }
 }
 
+interface AuthenticatedCasesRouteChildren {
+  AuthenticatedCasesCaseIdRoute: typeof AuthenticatedCasesCaseIdRoute
+}
+
+const AuthenticatedCasesRouteChildren: AuthenticatedCasesRouteChildren = {
+  AuthenticatedCasesCaseIdRoute: AuthenticatedCasesCaseIdRoute,
+}
+
+const AuthenticatedCasesRouteWithChildren =
+  AuthenticatedCasesRoute._addFileChildren(AuthenticatedCasesRouteChildren)
+
+interface AuthenticatedRouteChildren {
+  AuthenticatedCasesRoute: typeof AuthenticatedCasesRouteWithChildren
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedCasesRoute: AuthenticatedCasesRouteWithChildren,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   CalculatorRoute: CalculatorRoute,
   ChatRoute: ChatRoute,
   ContractScanRoute: ContractScanRoute,
   DocumentsRoute: DocumentsRoute,
   FightBackRoute: FightBackRoute,
   JusticeMapRoute: JusticeMapRoute,
+  LoginRoute: LoginRoute,
   OtTaxRoute: OtTaxRoute,
+  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

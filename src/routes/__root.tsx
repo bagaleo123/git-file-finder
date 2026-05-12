@@ -9,6 +9,8 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { AuthProvider } from "@/lib/auth";
+import { Toaster } from "sonner";
 
 function NotFoundComponent() {
   return (
@@ -72,11 +74,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "The Labor Shield Thailand — Free AI Legal Help for Foreign Workers (2026)" },
+      { name: "description", content: "Free AI assistant + tools built on the Thai Labor Protection Act 2541 (2026 update). Severance calculator, contract scanner, secure case room, and step-by-step guidance for expats and Thai workers." },
+      { name: "author", content: "The Labor Shield Thailand" },
+      { property: "og:title", content: "The Labor Shield Thailand — Free AI Legal Help (2026)" },
+      { property: "og:description", content: "Know what you're owed. Scan your contract. Build your case. Free for everyone in Thailand." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -113,7 +115,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <AuthProvider>
+        <Outlet />
+        <Toaster theme="dark" position="top-right" richColors />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
