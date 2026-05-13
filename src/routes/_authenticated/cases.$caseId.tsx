@@ -7,6 +7,7 @@ import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { AIDisclaimer } from "@/components/ai-disclaimer";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useLang } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/cases/$caseId")({
@@ -23,6 +24,7 @@ type FileRow = { id: string; storage_path: string; filename: string; mime_type: 
 function CaseDetail() {
   const { caseId } = Route.useParams();
   const { user } = useAuth();
+  const { lang, t } = useLang();
   const [caseInfo, setCaseInfo] = useState<{ title: string; employer_name: string | null; summary: string | null } | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [files, setFiles] = useState<FileRow[]>([]);
@@ -70,7 +72,7 @@ function CaseDetail() {
       const resp = await fetch(ANALYZE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-        body: JSON.stringify({ fileId: row.id, mime: file.type, base64: b64, filename: file.name }),
+        body: JSON.stringify({ fileId: row.id, mime: file.type, base64: b64, filename: file.name, lang }),
       });
       const j = await resp.json();
       if (j.extracted_text) {
@@ -125,7 +127,7 @@ function CaseDetail() {
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-        body: JSON.stringify({ messages: [contextMsg, ...next] }),
+        body: JSON.stringify({ messages: [contextMsg, ...next], lang }),
       });
       if (!resp.ok || !resp.body) {
         if (resp.status === 429) throw new Error("Rate limit. Wait and try again.");
@@ -202,7 +204,7 @@ function CaseDetail() {
               )}
             </div>
             <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="border-t border-border/60 p-3 flex gap-2">
-              <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask about your case…" className="flex-1 bg-surface/60 border border-border/60 rounded-xl px-4 py-3 text-sm outline-none focus:border-primary/60" disabled={loading} />
+              <input value={input} onChange={(e) => setInput(e.target.value)} placeholder={t("chat.placeholder")} className="flex-1 bg-surface/60 border border-border/60 rounded-xl px-4 py-3 text-sm outline-none focus:border-primary/60" disabled={loading} />
               <button type="submit" disabled={loading || !input.trim()} className="h-12 w-12 grid place-items-center rounded-xl bg-gradient-primary text-primary-foreground disabled:opacity-50"><Send className="h-4 w-4" /></button>
             </form>
             <AIDisclaimer compact />
