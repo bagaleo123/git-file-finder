@@ -9,16 +9,18 @@ const cors = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   try {
-    const { fileId, mime, base64, filename } = await req.json();
+    const { fileId, mime, base64, filename, lang } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const SB_URL = Deno.env.get("SUPABASE_URL")!;
     const SB_SR = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
+    const langName = lang === "th" ? "Thai" : lang === "ru" ? "Russian" : "English";
+
     const userParts: any[] = [
       {
         type: "text",
-        text: `You are a Thai labor-law document analyst. The user uploaded "${filename}" to their case file.\n\nExtract every relevant fact in plain English:\n- Document type (employment contract, payslip, termination letter, work permit, visa, warning letter, etc.)\n- Parties involved (employer, employee names if present)\n- Salary, allowances, working hours, probation period\n- Notice period, termination clauses\n- Any clauses that VIOLATE Thai Labor Protection Act 2541 (e.g. waiver of severance, holding passport, illegal probation, no sick leave)\n- Dates, deadlines, signatures\n- Anything missing that should legally be there\n\nReturn a CONCISE structured summary with markdown headings. Be precise. This summary will be used by another AI to advise the worker — accuracy matters.`,
+        text: `You are a Thai labor-law document analyst. The user uploaded "${filename}" to their case file.\n\nExtract every relevant fact in plain ${langName}:\n- Document type (employment contract, payslip, termination letter, work permit, visa, warning letter, etc.)\n- Parties involved (employer, employee names if present)\n- Salary, allowances, working hours, probation period\n- Notice period, termination clauses\n- Any clauses that VIOLATE Thai Labor Protection Act 2541 (e.g. waiver of severance, holding passport, illegal probation, no sick leave)\n- Dates, deadlines, signatures\n- Anything missing that should legally be there\n\nReturn a CONCISE structured summary in ${langName} with markdown headings. Be precise. Do NOT invent facts. If text is unreadable, say so.`,
       },
     ];
 
