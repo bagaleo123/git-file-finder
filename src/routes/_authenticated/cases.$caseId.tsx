@@ -211,7 +211,11 @@ function CaseDetail() {
           </div>
 
           {/* FILES */}
-          <aside className="glass rounded-2xl p-5 h-fit">
+          <aside
+            className="glass rounded-2xl p-5 h-fit"
+            onDragOver={(e) => { e.preventDefault(); }}
+            onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) void uploadFile(f); }}
+          >
             <div className="flex items-center justify-between gap-2 mb-3">
               <div className="text-sm font-semibold flex items-center gap-2"><Paperclip className="h-4 w-4 text-primary" /> Case files</div>
               <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="text-xs px-3 py-1.5 rounded-lg bg-gradient-primary text-primary-foreground font-medium inline-flex items-center gap-1">
@@ -219,7 +223,7 @@ function CaseDetail() {
               </button>
               <input ref={fileInputRef} type="file" hidden accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.doc,.docx" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f); e.target.value = ""; }} />
             </div>
-            <p className="text-[11px] text-muted-foreground mb-3">PDF, image, or text. Max 15 MB. The AI reads them to advise on your case.</p>
+            <p className="text-[11px] text-muted-foreground mb-3">Drag & drop or click Upload. PDF, image, or text. Max 15 MB.</p>
             {files.length === 0 ? (
               <div className="text-xs text-muted-foreground py-6 text-center">No files yet</div>
             ) : (
