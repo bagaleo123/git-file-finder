@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Send, Sparkles, Loader2 } from "lucide-react";
 import { AIDisclaimer } from "./ai-disclaimer";
+import { useLang } from "@/lib/i18n";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-legal-chat`;
 
@@ -16,6 +17,7 @@ const STARTERS = [
 ];
 
 export function ChatPanel({ initialMessages = [] as Msg[] }) {
+  const { lang, t } = useLang();
   const [messages, setMessages] = useState<Msg[]>(initialMessages);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,7 +56,7 @@ export function ChatPanel({ initialMessages = [] as Msg[] }) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: next }),
+        body: JSON.stringify({ messages: next, lang }),
       });
       if (!resp.ok || !resp.body) {
         if (resp.status === 429) throw new Error("Rate limit. Wait a few seconds and try again.");
@@ -150,7 +152,7 @@ export function ChatPanel({ initialMessages = [] as Msg[] }) {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about Thai labor law…"
+          placeholder={t("chat.placeholder")}
           className="flex-1 bg-surface/60 border border-border/60 rounded-xl px-4 py-3 text-sm outline-none focus:border-primary/60"
           disabled={loading}
         />
