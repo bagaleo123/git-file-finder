@@ -105,9 +105,12 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages } = await req.json();
+    const { messages, lang } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
+    const langName = lang === "th" ? "Thai (ภาษาไทย)" : lang === "ru" ? "Russian (Русский)" : "English";
+    const langInstruction = `\n\n# OUTPUT LANGUAGE\nAlways reply in ${langName}. Translate every section header, bullet, and script into ${langName}. If you quote a Thai statute, give the Thai title plus a ${langName} translation. Keep statute citations (e.g. "LPA §118") in Latin script — they are universal.\n\n# ACCURACY DISCIPLINE\n- Do NOT invent statutes, section numbers, fines, deadlines, or office names.\n- If a number depends on the user's salary, tenure, or province and was not provided, ASK ONCE before computing.\n- If you are not 90%+ sure of a fact, mark it "(verify with DLPW 1546)".\n- Cross-check every figure against the 2026 statutory knowledge above before stating it.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -116,8 +119,8 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+        model: "google/gemini-2.5-pro",
+        messages: [{ role: "system", content: SYSTEM_PROMPT + langInstruction }, ...messages],
         stream: true,
       }),
     });
