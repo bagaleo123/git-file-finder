@@ -1,20 +1,44 @@
 import { Link } from "@tanstack/react-router";
-import { Shield, LogIn, Briefcase } from "lucide-react";
+import { Shield, LogIn, Briefcase, Globe } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { DonateInline } from "@/components/donate-widget";
+import { useLang, LANG_LABELS, type Lang } from "@/lib/i18n";
 
-const NAV = [
-  { to: "/calculator", label: "Calculator" },
-  { to: "/contract-scan", label: "Contract Scan" },
-  { to: "/ot-tax", label: "OT & Tax" },
-  { to: "/fight-back", label: "Fight Back" },
-  { to: "/documents", label: "Documents" },
-  { to: "/justice-map", label: "Justice Map" },
-  { to: "/chat", label: "AI Chat" },
-] as const;
+function useNav() {
+  const { t } = useLang();
+  return [
+    { to: "/calculator", label: t("nav.calculator") },
+    { to: "/contract-scan", label: t("nav.scan") },
+    { to: "/ot-tax", label: t("nav.ottax") },
+    { to: "/fight-back", label: t("nav.fight") },
+    { to: "/documents", label: t("nav.docs") },
+    { to: "/justice-map", label: t("nav.map") },
+    { to: "/chat", label: t("nav.chat") },
+  ] as const;
+}
+
+function LangSwitcher() {
+  const { lang, setLang } = useLang();
+  return (
+    <label className="hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground">
+      <Globe className="h-3.5 w-3.5" />
+      <select
+        value={lang}
+        onChange={(e) => setLang(e.target.value as Lang)}
+        className="bg-transparent border border-border/60 rounded-md px-2 py-1 text-xs focus:outline-none focus:border-primary/60"
+      >
+        {(Object.keys(LANG_LABELS) as Lang[]).map((l) => (
+          <option key={l} value={l} className="bg-background">{LANG_LABELS[l]}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
 
 export function SiteHeader() {
   const { user } = useAuth();
+  const { t } = useLang();
+  const NAV = useNav();
   return (
     <header className="sticky top-0 z-40 glass border-b border-border/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
@@ -40,13 +64,14 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <LangSwitcher />
           {user ? (
             <Link to="/cases" className="text-xs px-3 py-2 rounded-lg bg-gradient-primary text-primary-foreground font-semibold inline-flex items-center gap-1.5">
-              <Briefcase className="h-3.5 w-3.5" /> My Cases
+              <Briefcase className="h-3.5 w-3.5" /> {t("nav.cases")}
             </Link>
           ) : (
             <Link to="/login" className="text-xs px-3 py-2 rounded-lg bg-gradient-primary text-primary-foreground font-semibold inline-flex items-center gap-1.5">
-              <LogIn className="h-3.5 w-3.5" /> Sign In
+              <LogIn className="h-3.5 w-3.5" /> {t("nav.signin")}
             </Link>
           )}
         </div>
