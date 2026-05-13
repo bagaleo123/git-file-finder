@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { PageShell } from "@/components/page-shell";
 import { Upload, FileSearch, Loader2, AlertTriangle, AlertCircle, Info, ShieldCheck } from "lucide-react";
+import { useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/contract-scan")({
   head: () => ({
@@ -30,27 +31,58 @@ type Result = {
 const SCAN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scan-contract`;
 
 function ContractScan() {
+  const { t, lang } = useLang();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+
+  const isTextLike = (f: File) =>
+    f.type === "text/plain" ||
+    f.type === "text/markdown" ||
+    /\.(txt|md)$/i.test(f.name);
 
   async function handleFile(f: File) {
+    setError(null);
     setFileName(f.name);
-    if (f.type === "text/plain" || f.name.endsWith(".txt") || f.name.endsWith(".md")) {
-      setText(await f.text());
+    if (isTextLike(f)) {
+      const t = await f.text();
+      setText(t);
       return;
     }
-    // Fallback: just read as text — for PDFs we tell user to paste
+    // For PDF / DOC / images: do NOT dump binary into the textarea.
+    // We send the file to the AI scan endpoint via base64 instead.
+    setError(null);
     try {
-      const t = await f.text();
-      if (t && t.trim().length > 50) setText(t);
-      else setError("PDF detected — please copy/paste the contract text into the box below for now.");
+      const buf = await f.arrayBuffer();
+      const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      setLoading(true);
+      const r = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-file`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+        body: JSON.stringify({ mime: f.type || "application/pdf", base64: b64, filename: f.name, lang }),
+      });
+      const j = await r.json();
+      if (j.extracted_text) {
+        setText(j.extracted_text);
+      } else {
+        setError("Couldn't read this file. Please paste the contract text directly.");
+      }
     } catch {
       setError("Couldn't read this file. Please paste the contract text directly.");
+    } finally {
+      setLoading(false);
     }
   }
+
+  const onDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) void handleFile(f);
+  }, []);
 
   async function scan() {
     if (text.trim().length < 50) { setError("Please paste at least a paragraph of contract text."); return; }
@@ -62,7 +94,7 @@ function ContractScan() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, lang }),
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || "Scan failed");
@@ -80,25 +112,33 @@ function ContractScan() {
     >
       <div className="grid lg:grid-cols-[1fr_1.2fr] gap-6">
         <div className="glass rounded-2xl p-6">
-          <label className="block">
-            <input
-              type="file"
-              accept=".txt,.md,.pdf,.doc,.docx"
-              className="hidden"
-              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-              id="cv-file"
-            />
-            <div className="cursor-pointer rounded-xl border-2 border-dashed border-border hover:border-primary/60 px-6 py-10 text-center transition" onClick={() => document.getElementById("cv-file")?.click()}>
-              <Upload className="h-8 w-8 mx-auto text-primary" />
-              <div className="mt-3 font-semibold">{fileName ?? "Upload contract / CV"}</div>
-              <div className="mt-1 text-xs text-muted-foreground">.txt, .md, .pdf, .doc — or paste below</div>
-            </div>
-          </label>
+          <input
+            type="file"
+            accept=".txt,.md,.pdf,.doc,.docx,.png,.jpg,.jpeg,.webp"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); e.target.value = ""; }}
+            id="cv-file"
+          />
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => document.getElementById("cv-file")?.click()}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") document.getElementById("cv-file")?.click(); }}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragEnter={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={onDrop}
+            className={`cursor-pointer rounded-xl border-2 border-dashed px-6 py-10 text-center transition ${dragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/60"}`}
+          >
+            <Upload className="h-8 w-8 mx-auto text-primary" />
+            <div className="mt-3 font-semibold">{dragOver ? t("upload.dropping") : (fileName ?? t("upload.title"))}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{t("upload.hint")}</div>
+          </div>
 
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Paste contract text here…"
+            placeholder={t("scan.paste")}
             className="mt-4 w-full h-64 bg-input border border-border rounded-xl p-4 text-sm font-mono outline-none focus:border-primary"
           />
 
@@ -107,7 +147,7 @@ function ContractScan() {
             disabled={loading || text.trim().length < 50}
             className="mt-4 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-primary text-primary-foreground font-semibold glow disabled:opacity-50"
           >
-            {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</> : <><FileSearch className="h-4 w-4" /> Scan Contract</>}
+            {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> {t("scan.analyzing")}</> : <><FileSearch className="h-4 w-4" /> {t("scan.button")}</>}
           </button>
 
           {error && <div className="mt-3 text-sm text-destructive">{error}</div>}
